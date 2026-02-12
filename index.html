@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ödeme Bilgileri</title>
+
+<style>
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto;
+  background: linear-gradient(135deg,#0f172a,#1e293b,#0b1220);
+  color:#fff;
+}
+
+.wrap{
+  max-width:520px;
+  margin:auto;
+  padding:25px;
+}
+
+.card{
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 15px 40px rgba(0,0,0,.5);
+  transition:.3s;
+}
+
+h1{
+  margin:0 0 20px;
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+
+.bankSelect{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.bankBtn{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.bankBtn.active{
+  background:#22c55e;
+  color:#000;
+  transform:scale(1.03);
+}
+
+.bankInfo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.bankLogo{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+  background:#fff;
+  border-radius:12px;
+  padding:6px;
+}
+
+.label{
+  font-size:12px;
+  opacity:.7;
+  margin-top:14px;
+}
+
+.value{
+  font-size:16px;
+  font-weight:700;
+  word-break:break-word;
+}
+
+.ibanBox{
+  margin-top:10px;
+  padding:16px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border:1px solid rgba(255,255,255,.2);
+  cursor:pointer;
+  transition:.3s;
+}
+
+.ibanBox:hover{
+  transform:scale(1.02);
+  border-color:#22c55e;
+}
+
+.btns{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  transition:.3s;
+}
+
+.primary{
+  background:#e11d48;
+  color:#fff;
+}
+
+.secondary{
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.2);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+}
+
+.toast{
+  margin-top:12px;
+  font-size:13px;
+  color:#22c55e;
+  display:none;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<div class="card">
+
+<h1>Ödeme Bilgileri</h1>
+
+<div class="bankSelect">
+<button class="bankBtn active" onclick="selectBank('vakif')" id="vakifBtn">VakıfBank</button>
+<button class="bankBtn" onclick="selectBank('ziraat')" id="ziraatBtn">Ziraat</button>
+</div>
+
+<div class="bankInfo">
+<img id="bankLogo" class="bankLogo">
+<div class="value" id="bank"></div>
+</div>
+
+<div class="label">Alıcı</div>
+<div class="value" id="name"></div>
+
+<div class="label">IBAN (Tıklayınca Kopyalanır)</div>
+<div class="ibanBox" onclick="copyIban()">
+<div class="value" id="ibanPretty"></div>
+</div>
+
+<div class="btns">
+<button class="btn primary" onclick="copyIban()">IBAN Kopyala</button>
+<button class="btn secondary" onclick="shareInfo()">Paylaş</button>
+<a class="btn secondary" id="whatsBtn" target="_blank">WhatsApp</a>
+</div>
+
+<div class="toast" id="toast">Kopyalandı ✅</div>
+
+</div>
+</div>
+
+<script>
+const banks = {
+  vakif:{
+    bank:"VakıfBank",
+    name:"Hakan İyisu",
+    ibanPretty:"TR62 0001 5001 5800 7302 0926 72",
+    ibanPlain:"TR620001500158007302092672",
+    logo:"https://upload.wikimedia.org/wikipedia/commons/7/70/Vak%C4%B1fBank_logo.svg"
+  },
+  ziraat:{
+    bank:"Ziraat Bankası",
+    name:"Hakan İyisu",
+    ibanPretty:"TR25 0001 0015 4940 7917 9950 07",
+    ibanPlain:"TR250001001549407917995007",
+    logo:"https://upload.wikimedia.org/wikipedia/commons/7/7e/Ziraat_Bankas%C4%B1_logo.svg"
+  }
+};
+
+let current = banks.vakif;
+
+function selectBank(type){
+  current = banks[type];
+  document.getElementById("vakifBtn").classList.remove("active");
+  document.getElementById("ziraatBtn").classList.remove("active");
+  document.getElementById(type+"Btn").classList.add("active");
+  render();
+}
+
+function render(){
+  document.getElementById("bank").textContent=current.bank;
+  document.getElementById("name").textContent=current.name;
+  document.getElementById("ibanPretty").textContent=current.ibanPretty;
+  document.getElementById("bankLogo").src=current.logo;
+
+  const waText = encodeURIComponent(
+    `Banka: ${current.bank}\nAlıcı: ${current.name}\nIBAN: ${current.ibanPretty}`
+  );
+  document.getElementById("whatsBtn").href=`https://wa.me/?text=${waText}`;
+}
+
+function copyIban(){
+  navigator.clipboard.writeText(current.ibanPlain);
+  showToast();
+}
+
+function shareInfo(){
+  const text=`Banka: ${current.bank}\nAlıcı: ${current.name}\nIBAN: ${current.ibanPretty}`;
+  if(navigator.share){
+    navigator.share({title:"Ödeme Bilgileri",text});
+  }else{
+    navigator.clipboard.writeText(text);
+    showToast();
+  }
+}
+
+function showToast(){
+  const toast=document.getElementById("toast");
+  toast.style.display="block";
+  setTimeout(()=>toast.style.display="none",1500);
+}
+
+render();
+</script>
+
+</body>
+</html>
